@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "bnet"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.7.1,<4.0"
+numpy = "^1.20.1"
+nptyping = "^1.4.0"
+scipy = "^1.6.1"
+networkx = "^2.5"
+pandas = "^1.2.3"
+PyYAML = "^5.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+python-language-server = {extras = ["all"], version = "^0.36.2"}
+isort = "^5.8.0"
+yapf = "^0.31.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,7 @@
+schedule-value:      [15]
+amount-training:     [25, 50, 100, 200]
+n:                   [25, 50, 75, 100]
+ro:                  [0.001]
+loop-per-condition:  10
+loop-per-simulation: 500
+filename:            "sup_td_variable_ratio_n.csv"

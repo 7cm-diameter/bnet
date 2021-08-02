@@ -1,0 +1,7 @@
+schedule-value:      [60]
+amount-training:     [500]
+n:                   [50]
+ro:                  [1.]
+loop-per-condition:  10
+loop-per-simulation: 500
+filename:            "sup_choice_other_vi.csv"

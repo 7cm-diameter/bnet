@@ -1,0 +1,7 @@
+n:                   [25, 50, 75, 100]
+ro:                  [0.001]
+q-operant:           (0.01, 1, 10)
+q-other:             (0.01, 0.01, 1)
+loop-per-condition:  10
+loop-per-simulation: 500
+filename:            "sup_hqnet_n.csv"
