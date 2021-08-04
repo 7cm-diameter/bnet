@@ -1,47 +1,15 @@
 import numpy as np
-from nptyping import NDArray
+from numpy.typing import NDArray
 
-import bnet.utype as ut
+import bnet.typing as tp
+from bnet import _propotional_allocation
 
 
-class UniformActor(ut.Actor):
-    def __init__(self, response_times: ut.ResponseTimes):
-        self.__rt = response_times
+class PropotionalActor(tp.Actor):
+    def __init__(self, response_times: NDArray[tp.ResponseTime]):
+        self._rt = response_times
 
-    def choose_action(self, weights: NDArray[1, float], *args,
-                      **kwargs) -> ut.Node:
-        probs = ut.ChoiceMethod.Uniform(weights)
-        n = len(weights)
+    def choose_action(self, rewards: NDArray[tp.Reward]) -> tp.Node:
+        n = len(rewards)
+        probs = _propotional_allocation(rewards)
         return np.random.choice(n, p=probs)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__rt[i]
-
-
-class SoftmaxActor(ut.Actor):
-    def __init__(self, response_times: ut.ResponseTimes):
-        self.__rt = response_times
-
-    def choose_action(self, weights: NDArray[1, float], *args,
-                      **kwargs) -> ut.Node:
-        beta = kwargs.get("beta", 1.)
-        probs = ut.ChoiceMethod.Softmax(weights, beta)
-        n = len(weights)
-        return np.random.choice(n, p=probs)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__rt[i]
-
-
-class PropotionalActor(ut.Actor):
-    def __init__(self, response_times: ut.ResponseTimes):
-        self.__rt = response_times
-
-    def choose_action(self, weights: NDArray[1, float], *args,
-                      **kwargs) -> ut.Node:
-        probs = ut.ChoiceMethod.Propotional(weights)
-        n = len(weights)
-        return np.random.choice(n, p=probs)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__rt[i]

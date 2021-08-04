@@ -1,38 +1,18 @@
 import numpy as np
+from numpy.typing import NDArray
 
-import bnet.utype as ut
+import bnet.typing as tp
 
 
-class TDLearner(ut.Learner):
+class QLearner(tp.Learner):
     def __init__(self, n: int, alpha: float):
-        self.__alpha = alpha
-        self.__weights = np.full((n, n), 1e-6)
+        self._alpha = alpha
+        self._q_values = np.full((n, n), 1e-6)
 
-    def update(self, i: ut.Node, j: ut.Node, reward: ut.RewardValue):
-        old_weight = self.__weights[i][j]
-        td_err = reward - old_weight
-        new_weight = old_weight + self.__alpha * td_err
-        self.__weights[i][j] = new_weight
+    def update(self, s: tp.Node, t: tp.Node, reward: tp.Reward):
+        td_err = reward - self._q_values[s][t]
+        self._q_values[s][t] += self._alpha * td_err
 
     @property
-    def weights(self):
-        return self.__weights
-
-
-class SarsaLearner(ut.Learner):
-    def __init__(self, n: int, alpha: float, gamma: float):
-        self.__alpha = alpha
-        self.__gamma = gamma
-        self.__weights = np.full((n, n), 1e-6)
-
-    def update(self, i: ut.Node, j: ut.Node, reward: ut.RewardValue,
-               rt: ut.ResponseTime, k: ut.Node):
-        old_weight = self.__weights[i][j]
-        next_weight = self.__weights[j][k]
-        td_err = (reward + self.__gamma * next_weight) - old_weight
-        new_weight = old_weight + self.__alpha * td_err
-        self.__weights[i][j] = new_weight
-
-    @property
-    def weights(self):
-        return self.__weights
+    def q_values(self) -> NDArray[tp.QValue]:
+        return self._q_values

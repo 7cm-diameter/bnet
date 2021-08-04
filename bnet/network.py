@@ -1,43 +1,31 @@
-from typing import List
+from typing import Callable, List
 
 import networkx as nx
 import numpy as np
+from numpy.typing import NDArray
 
-import bnet.utype as ut
+import bnet.typing as tp
 
 
-class WeightAgnosticNetwork(ut.Network, nx.Graph):
+class SimpleBehavioralNetwork(tp.BehavioralNetwork, nx.Graph):
     def __init__(self):
         nx.Graph.__init__(self)
 
-    def construct_network(self, mindeg: int, weights: ut.WeightMatrix,
-                          method: ut.ChoiceMethod, *args, **kwargs):
-        n, _ = weights.shape
-        for start in range(n):
-            if method is ut.ChoiceMethod.Softmax:
-                beta = kwargs.get("beta", 1.)
-                probs = method(weights[start], beta)
-            else:
-                probs = method(weights[start])
-            destinations = np.random.choice(n,
-                                            size=mindeg,
-                                            p=probs,
-                                            replace=False)
-            [self.add_edge(start, dest) for dest in destinations]
+    def construct_network(self, q_values: NDArray[tp.QValue], q2p: Callable,
+                          min_):
+        n, _ = q_values.shape
+        for f in range(n):
+            probs = q2p(q_values[f])
+            t = np.random.choice(n, size=min_, p=probs, replace=False)
+            [self.add_edge(f, t_) for t_ in t]
 
-    def find_path(self, start: ut.Node, goal: ut.Node) -> List[ut.Path]:
-        if not start == goal:
-            return list(nx.all_shortest_paths(self, start, goal))
+    def find_path(self, s: tp.Node, t: tp.Node) -> List[tp.Path]:
+        if not s == t:
+            return list(nx.all_shortest_paths(self, s, t))
 
-        has_self_loop = self.has_edge(start, start)
-        if not has_self_loop:
-            neignbors = list(nx.all_neighbors(self, start))
-            start_ = np.random.choice(neignbors)
-            paths = self.find_path(start_, goal)
-            [path.insert(0, start) for path in paths]
-            return paths
-        return [[start, goal]]
+        if self.has_edge(s, s):
+            return [[s, t]]
 
-    @property
-    def network(self) -> "WeightAgnosticNetwork":
-        return self
+        neighbors = list(nx.all_neighbors(self, s))
+        s_ = np.random.choice(neighbors)
+        return [[s, s_, t]]
