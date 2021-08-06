@@ -34,13 +34,6 @@ class Learner(metaclass=ABCMeta):
         pass
 
 
-class Actor(metaclass=ABCMeta):
-    @abstractmethod
-    def choose_action(
-            self, rewards: npt.NDArray[Reward]) -> Tuple[Node, ResponseTime]:
-        pass
-
-
 class Agent(metaclass=ABCMeta):
     @abstractmethod
     def construct_network(self, *args, **kwargs):
