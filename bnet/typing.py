@@ -55,6 +55,5 @@ class Agent(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def choose_action(
-            self, rewards: npt.NDArray[Reward]) -> Tuple[Node, ResponseTime]:
+    def choose_action(self, rewards: npt.NDArray[Reward]) -> Node:
         pass
