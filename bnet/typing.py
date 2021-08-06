@@ -23,17 +23,6 @@ class BehavioralNetwork(metaclass=ABCMeta):
         pass
 
 
-class Learner(metaclass=ABCMeta):
-    @abstractmethod
-    def update(self, s: Node, t: Node, reward: Reward):
-        pass
-
-    @property
-    @abstractmethod
-    def q_values(self) -> npt.NDArray[QValue]:
-        pass
-
-
 class Agent(metaclass=ABCMeta):
     @abstractmethod
     def construct_network(self, *args, **kwargs):
