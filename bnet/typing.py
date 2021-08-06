@@ -57,3 +57,7 @@ class Agent(metaclass=ABCMeta):
     @abstractmethod
     def choose_action(self, rewards: npt.NDArray[Reward]) -> Node:
         pass
+
+    @abstractmethod
+    def engage_response(self, response: Node) -> ResponseTime:
+        pass
