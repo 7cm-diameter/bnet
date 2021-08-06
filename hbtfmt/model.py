@@ -1,108 +1,62 @@
-from typing import List
-
-import bnet.utype as ut
+import bnet.typing as tp
 import numpy as np
-from bnet.actor import PropotionalActor
-from bnet.learner import SarsaLearner, TDLearner
-from bnet.network import WeightAgnosticNetwork
-from bnet.util import exp_rng
-from nptyping import NDArray
+import numpy.typing as npt
+from bnet import _propotional_allocation
+from bnet.network import SimpleBehavioralNetwork
 
 
-class HQAgent(ut.Agent):
-    def __init__(self, q_opeant: float, q_other: float, n: int):
-        q_ = np.full(n, q_other)
-        q_[0] = q_opeant
-        self.__weights: NDArray[2, float] = np.outer(q_, q_)
-        self.__actor = PropotionalActor(np.zeros(n))
-        self.__net = WeightAgnosticNetwork()
+class HQAgent(tp.Agent):
+    def __init__(self, n: int, q_operant: float, q_others: float):
+        self._n = n
+        q = np.full((n, n), q_others)
+        q[0] = q_operant
+        self._q_values = q
+        self._net = SimpleBehavioralNetwork()
 
-    def update(self):
+    def construct_network(self, min_: int):
+        self._net.construct_network(self._q_values, _propotional_allocation,
+                                    min_)
+
+    def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
+        paths = self._net.find_path(s, t)
+        i = np.random.choice(len(paths))
+        return paths[i]
+
+    def update(self, s: tp.Node, t: tp.Node, reward: tp.Reward):
         pass
 
-    @property
-    def weights(self) -> ut.WeightMatrix:
-        return self.__weights
+    def choose_action(self, rewards: npt.NDArray[tp.Reward]) -> tp.Node:
+        probs = _propotional_allocation(rewards)
+        return np.random.choice(self._n, p=probs)
 
-    def construct_network(self, mindeg: int):
-        self.__net.construct_network(mindeg, self.weights,
-                                     ut.ChoiceMethod.Propotional)
-
-    def find_path(self, start: ut.Node, goal: ut.Node) -> List[ut.Path]:
-        return self.__net.find_path(start, goal)
-
-    @property
-    def network(self) -> ut.Network:
-        return self.__net
-
-    def choose_action(self, weights: ut.RewardValues) -> ut.Node:
-        return self.__actor.choose_action(weights)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__actor.take_time(i)
+    def engage_response(self, response: tp.Node) -> tp.ResponseTime:
+        return np.float_(0.)
 
 
-class TDAgent(ut.Agent):
-    def __init__(self, n: int, alpha: float, rt: float):
-        self.__learner = TDLearner(n, alpha)
-        rts = exp_rng(rt, n, 0.1)
-        self.__actor = PropotionalActor(rts)
-        self.__net = WeightAgnosticNetwork()
+class QAgent(tp.Agent):
+    def __init__(self, n: int, alpha: float,
+                 response_times: npt.NDArray[tp.ResponseTime]):
+        self._n = n
+        self._alpha = alpha
+        self._q_values = np.full((n, n), 1e-6)
+        self._response_times = response_times
+        self._net = SimpleBehavioralNetwork()
 
-    def update(self, i: ut.Node, j: ut.Node, reward: ut.RewardValue):
-        self.__learner.update(i, j, reward)
+    def construct_network(self, min_: int):
+        self._net.construct_network(self._q_values, _propotional_allocation,
+                                    min_)
 
-    @property
-    def weights(self) -> ut.WeightMatrix:
-        return self.__learner.weights
+    def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
+        paths = self._net.find_path(s, t)
+        i = np.random.choice(len(paths))
+        return paths[i]
 
-    def construct_network(self, mindeg: int):
-        self.__net.construct_network(mindeg, self.weights,
-                                     ut.ChoiceMethod.Propotional)
+    def update(self, s: tp.Node, t: tp.Node, reward: tp.Reward):
+        self._q_values[s][t] += self._alpha * (reward - self._q_values[s][t])
 
-    def find_path(self, start: ut.Node, goal: ut.Node) -> List[ut.Path]:
-        return self.__net.find_path(start, goal)
+    def choose_action(self, rewards: npt.NDArray[tp.Reward]) -> tp.Node:
+        probs = _propotional_allocation(rewards)
+        return np.random.choice(self._n, p=probs)
 
-    @property
-    def network(self) -> ut.Network:
-        return self.__net
-
-    def choose_action(self, weights: ut.RewardValues) -> ut.Node:
-        return self.__actor.choose_action(weights)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__actor.take_time(i)
-
-
-class SarsaAgent(ut.Agent):
-    def __init__(self, n: int, alpha: float, rt: float):
-        self.__learner = SarsaLearner(n, alpha, 0.9)
-        rts = exp_rng(rt, n, 0.1)
-        self.__actor = PropotionalActor(rts)
-        self.__net = WeightAgnosticNetwork()
-
-    def update(self, i: ut.Node, j: ut.Node, reward: ut.RewardValue,
-               k: ut.Node):
-        rt = self.take_time(k)
-        self.__learner.update(i, j, reward, rt, k)
-
-    @property
-    def weights(self) -> ut.WeightMatrix:
-        return self.__learner.weights
-
-    def construct_network(self, mindeg: int):
-        self.__net.construct_network(mindeg, self.weights,
-                                     ut.ChoiceMethod.Propotional)
-
-    def find_path(self, start: ut.Node, goal: ut.Node) -> List[ut.Path]:
-        return self.__net.find_path(start, goal)
-
-    @property
-    def network(self) -> ut.Network:
-        return self.__net
-
-    def choose_action(self, weights: ut.RewardValues) -> ut.Node:
-        return self.__actor.choose_action(weights)
-
-    def take_time(self, i: ut.Node) -> ut.ResponseTime:
-        return self.__actor.take_time(i)
+    def engage_response(self, response: tp.Node) -> tp.ResponseTime:
+        return self._response_times[response]

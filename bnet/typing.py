@@ -43,3 +43,17 @@ class Agent(metaclass=ABCMeta):
     @abstractmethod
     def engage_response(self, response: Node) -> ResponseTime:
         pass
+
+
+class Environment(metaclass=ABCMeta):
+    @abstractmethod
+    def step(self,
+             action: Node,
+             time: ResponseTime,
+             forever: bool = False) -> Reward:
+        pass
+
+    @property
+    @abstractmethod
+    def finished(self) -> bool:
+        pass
