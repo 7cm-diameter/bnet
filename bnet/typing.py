@@ -53,3 +53,8 @@ class Schedule(metaclass=ABCMeta):
     @abstractmethod
     def finished(self) -> bool:
         pass
+
+
+class Repeatable(metaclass=ABCMeta):
+    def reset(self):
+        pass
