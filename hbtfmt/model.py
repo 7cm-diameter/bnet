@@ -9,7 +9,7 @@ class HQAgent(tp.Agent):
     def __init__(self, n: int, q_operant: float, q_others: float):
         self._n = n
         q = np.full((n, n), q_others)
-        q[0] = q_operant
+        q[:, 0] = q_operant
         self._q_values = q
         self._net = SimpleBehavioralNetwork()
 
