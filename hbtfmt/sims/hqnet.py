@@ -1,41 +1,21 @@
 if __name__ == '__main__':
-    from typing import List, Tuple
-
     import numpy as np
-    from bnet.util import create_data_dir
+    from hbtfmt import free_access
     from hbtfmt.model import HQAgent
-    from hbtfmt.util import (ConfigClap, format_data1, generate_rewards,
-                             parameter_product1, run_baseline_test)
-    from networkx import to_numpy_matrix
 
-    clap = ConfigClap()
-    config = clap.config()
-    params = parameter_product1(config)
+    N = 50
+    q_operant = 1.
+    q_other = 0.01
+    reward_operant = 1.
+    reward_others = 0.1
 
-    data_dir = create_data_dir(__file__, "bnet")
-    filepath = data_dir.joinpath(config.filename)
+    agent = HQAgent(N, 1, 0.001)
+    agent.construct_network(2)
+    rewards = np.full(N, reward_others)
+    rewards[0] = reward_operant  # 0 denotes the operant response
 
-    results: List[Tuple[int, float, float, float, int, int, float, float]] = []
-
-    for param in params:
-        n, ro, qop, qot = param
-        rewards_baseline = generate_rewards(1., ro, n)
-        rewards_test = generate_rewards(0., ro, n)
-
-        print(f"n = {n}, ro = {ro}, qop = {qop}, qot  = {qot}")
-
-        for i in range(config.loop_per_condition):
-            agent = HQAgent(qop, qot, n)
-            agent.construct_network(2)
-
-            result = run_baseline_test(agent, rewards_baseline, rewards_test,
-                                       n, config.loop_per_simulation)
-            result_with_params = param + result
-            results.append(result_with_params)
-
-        mat = to_numpy_matrix(agent.network).astype(np.uint8)
-        matpath = data_dir.joinpath(filepath.stem + f"-mat{-qop}.csv")
-        np.savetxt(matpath, mat, delimiter=",", fmt="%d")
-
-    output_data = format_data1(results)
-    output_data.to_csv(filepath, index=False)
+    pre_devaluation_propotion = free_access(agent, rewards, 500)
+    # reduce the value of reward obtained by the operant response
+    # by setting the value of `rewards[0]` to 0
+    rewards[0] = 0.
+    post_devaluation_propotion = free_access(agent, rewards, 500)
