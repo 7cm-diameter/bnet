@@ -45,15 +45,11 @@ class Agent(metaclass=ABCMeta):
         pass
 
 
-class Environment(metaclass=ABCMeta):
+class Schedule(metaclass=ABCMeta):
     @abstractmethod
-    def step(self,
-             action: Node,
-             time: ResponseTime,
-             forever: bool = False) -> Reward:
+    def step(self, action: int, time: ResponseTime) -> Reward:
         pass
 
-    @property
     @abstractmethod
     def finished(self) -> bool:
         pass
