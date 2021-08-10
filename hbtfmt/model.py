@@ -32,6 +32,10 @@ class HQAgent(tp.Agent):
     def engage_response(self, response: tp.Node) -> tp.ResponseTime:
         return np.float_(0.)
 
+    @property
+    def n(self) -> int:
+        return self._n
+
 
 class QAgent(tp.Agent):
     def __init__(self, n: int, alpha: float,
@@ -60,3 +64,7 @@ class QAgent(tp.Agent):
 
     def engage_response(self, response: tp.Node) -> tp.ResponseTime:
         return self._response_times[response]
+
+    @property
+    def n(self) -> int:
+        return self._n

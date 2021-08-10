@@ -44,6 +44,11 @@ class Agent(metaclass=ABCMeta):
     def engage_response(self, response: Node) -> ResponseTime:
         pass
 
+    @property
+    @abstractmethod
+    def n(self) -> int:
+        pass
+
 
 class Schedule(metaclass=ABCMeta):
     @abstractmethod
