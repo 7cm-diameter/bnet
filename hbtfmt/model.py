@@ -1,7 +1,7 @@
 import bnet.typing as tp
 import numpy as np
 import numpy.typing as npt
-from bnet import _propotional_allocation
+from bnet import propotional_allocation
 from bnet.network import SimpleBehavioralNetwork
 
 
@@ -14,7 +14,7 @@ class HQAgent(tp.Agent):
         self._net = SimpleBehavioralNetwork()
 
     def construct_network(self, min_: int):
-        self._net.construct_network(self._q_values, _propotional_allocation,
+        self._net.construct_network(self._q_values, propotional_allocation,
                                     min_)
 
     def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
@@ -26,7 +26,7 @@ class HQAgent(tp.Agent):
         pass
 
     def choose_action(self, rewards: npt.NDArray[tp.Reward]) -> tp.Node:
-        probs = _propotional_allocation(rewards)
+        probs = propotional_allocation(rewards)
         return np.random.choice(self._n, p=probs)
 
     def engage_response(self, response: tp.Node) -> tp.ResponseTime:
@@ -35,6 +35,10 @@ class HQAgent(tp.Agent):
     @property
     def n(self) -> int:
         return self._n
+
+    @property
+    def network(self) -> SimpleBehavioralNetwork:
+        return self._net
 
 
 class QAgent(tp.Agent):
@@ -47,7 +51,7 @@ class QAgent(tp.Agent):
         self._net = SimpleBehavioralNetwork()
 
     def construct_network(self, min_: int):
-        self._net.construct_network(self._q_values, _propotional_allocation,
+        self._net.construct_network(self._q_values, propotional_allocation,
                                     min_)
 
     def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
@@ -59,7 +63,7 @@ class QAgent(tp.Agent):
         self._q_values[s][t] += self._alpha * (reward - self._q_values[s][t])
 
     def choose_action(self, rewards: npt.NDArray[tp.Reward]) -> tp.Node:
-        probs = _propotional_allocation(rewards)
+        probs = propotional_allocation(rewards)
         return np.random.choice(self._n, p=probs)
 
     def engage_response(self, response: tp.Node) -> tp.ResponseTime:
@@ -68,3 +72,7 @@ class QAgent(tp.Agent):
     @property
     def n(self) -> int:
         return self._n
+
+    @property
+    def network(self) -> SimpleBehavioralNetwork:
+        return self._net

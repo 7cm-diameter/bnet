@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import List, Tuple
 
 import numpy as np
+from networkx import Graph
 from numpy import typing as npt
 
 Node = int
@@ -47,6 +48,11 @@ class Agent(metaclass=ABCMeta):
     @property
     @abstractmethod
     def n(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def network(self) -> Graph:
         pass
 
 
