@@ -17,8 +17,10 @@ def propotional_allocation(x: NDArray[np.float_]) -> NDArray[np.float_]:
 
 
 def exp_rng(mean: float, n: int, _min: float) -> NDArray[np.float_]:
-    return st.expon.ppf(np.linspace(0.001, 0.999, n), scale=mean, loc=_min)
+    rn = st.expon.ppf(np.linspace(0.001, 0.999, n), scale=mean, loc=_min)
+    return np.random.choice(rn, size=n, replace=False)
 
 
-def geom_rng(mean: float, n: int, _min: float) -> NDArray[np.float_]:
-    return st.geom.ppf(np.linspace(0.001, 0.999, n), p=1 / mean, loc=_min)
+def geom_rng(mean: float, n: int, _min: float) -> NDArray[np.int_]:
+    rn = st.geom.ppf(np.linspace(0.001, 0.999, n), p=1 / mean, loc=_min)
+    return np.random.choice(rn, size=n, replace=False)
