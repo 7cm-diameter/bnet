@@ -25,7 +25,7 @@ class FixedRatio(tp.Schedule, tp.Repeatable):
 
     def finished(self) -> bool:
         if self._repeat:
-            return True
+            return False
         return self._cumulative_rewards >= self._n
 
     def step(self, action: int, time: tp.ResponseTime) -> tp.Reward:
@@ -63,7 +63,7 @@ class VariableRatio(tp.Schedule, tp.Repeatable):
 
     def finished(self) -> bool:
         if self._repeat:
-            return True
+            return False
         return self._cumulative_rewards >= self._n
 
     def step(self, action: int, time: tp.ResponseTime) -> tp.Reward:
@@ -102,7 +102,7 @@ class VariableInterval(tp.Schedule, tp.Repeatable):
 
     def finished(self) -> bool:
         if self._repeat:
-            return True
+            return False
         return self._cumulative_rewards >= self._n
 
     def step(self, action: int, time: tp.ResponseTime) -> tp.Reward:
