@@ -120,6 +120,45 @@ class VariableInterval(tp.Schedule, tp.Repeatable):
         return np.float_(0.)
 
 
+class VariableTime(tp.Schedule, tp.Repeatable):
+    def __init__(self,
+                 x: int,
+                 n: int,
+                 reward: tp.Reward,
+                 repeat: bool = False):
+        self._reward = reward
+        self._n = n
+        self._x = x
+        self._intervals = exp_rng(x, n, 1)
+        self._cumulative_rewards = 0
+        self._interval = self._intervals[0]
+        self._repeat = repeat
+
+    def reset(self):
+        self._intervals = exp_rng(self._x, self._n, 1)
+        self._cumulative_rewards = 0
+        self._interval = self._intervals[0]
+
+    def finished(self) -> bool:
+        if self._repeat:
+            return False
+        return self._cumulative_rewards >= self._n
+
+    def step(self, action: int, time: tp.ResponseTime) -> tp.Reward:
+        if self.finished():
+            return np.float_(0.)
+        self._interval -= time
+        if self._interval <= 0.:
+            self._cumulative_rewards += 1
+            if not self.finished():
+                self._interval = \
+                    self._intervals[self._cumulative_rewards]
+            if self._repeat:
+                self.reset()
+            return self._reward
+        return np.float_(0.)
+
+
 class ConcurrentSchedule(object):
     def __init__(self, schedules: List[tp.Schedule]):
         self._schedules = schedules
