@@ -20,7 +20,7 @@ class HQAgent(tp.Agent):
     def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
         paths = self._net.find_path(s, t)
         i = np.random.choice(len(paths))
-        return paths[i]
+        return paths[i][1:]
 
     def update(self, s: tp.Node, t: tp.Node, reward: tp.Reward):
         pass
@@ -57,7 +57,7 @@ class QAgent(tp.Agent):
     def generate_action_sequence(self, s: tp.Node, t: tp.Node) -> tp.Path:
         paths = self._net.find_path(s, t)
         i = np.random.choice(len(paths))
-        return paths[i]
+        return paths[i][1:]
 
     def update(self, s: tp.Node, t: tp.Node, reward: tp.Reward):
         self._q_values[s][t] += self._alpha * (reward - self._q_values[s][t])
