@@ -122,7 +122,7 @@ class VariableInterval(tp.Schedule, tp.Repeatable):
 
 class VariableTime(tp.Schedule, tp.Repeatable):
     def __init__(self,
-                 x: int,
+                 x: float,
                  n: int,
                  reward: tp.Reward,
                  repeat: bool = False):
@@ -159,7 +159,7 @@ class VariableTime(tp.Schedule, tp.Repeatable):
         return np.float_(0.)
 
 
-class ConcurrentSchedule(object):
+class ConcurrentSchedule(tp.Schedule):
     def __init__(self, schedules: List[tp.Schedule]):
         self._schedules = schedules
 
@@ -172,3 +172,24 @@ class ConcurrentSchedule(object):
         for s, a in zip(self._schedules, actions):
             reward += s.step(a, time)
         return np.float_(reward)
+
+
+class TandemSchedule(tp.Schedule):
+    def __init__(self, schedules: List[tp.Schedule]):
+        self._schedules = schedules
+        self._current_schedule = 0
+        self._nschedule = len(schedules) - 1
+
+    def finished(self) -> bool:
+        return self._schedules[-1].finished()
+
+    def step(self, action: int, time: tp.ResponseTime) -> tp.Reward:
+        if self.finished():
+            return np.float_(0.)
+        reward = self._schedules[self._current_schedule].step(action, time)
+        if reward > 0 and self._current_schedule == self._nschedule:
+            self._current_schedule = 0
+            return reward
+        if reward > 0 and not self._current_schedule == self._nschedule:
+            self._current_schedule += 1
+        return np.float_(0.)
