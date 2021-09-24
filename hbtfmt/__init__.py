@@ -31,16 +31,20 @@ def free_access(agent: tp.Agent, rewards: NDArray[np.float_],
 # We assumed that an agent's behavior as a choice
 # between the operant response and other responses
 # so all enviroments used in simulations are conccurent schedules
-def train(agent: tp.Agent, env: ConcurrentSchedule):
+def train(agent: tp.Agent, env: ConcurrentSchedule) -> float:
+    elapsed_time = 0.
     n = agent.n
     current_response = np.random.choice(n)
     main_schedule_continue = not env.finished()[0]
+    pseudo_rewards = np.full(50, 1.)
 
     while main_schedule_continue:
-        next_response = np.random.choice(n)
+        next_response = agent.choose_action(pseudo_rewards)
         t = agent.engage_response(next_response)
+        elapsed_time += t
         onehot_response = as_onehot(next_response, n)
         reward = env.step(onehot_response, t)
         agent.update(current_response, next_response, reward)
         current_response = next_response
         main_schedule_continue = not env.finished()[0]
+    return elapsed_time
