@@ -83,7 +83,7 @@ class VariableRatio(tp.Schedule, tp.Repeatable):
 
 class VariableInterval(tp.Schedule, tp.Repeatable):
     def __init__(self,
-                 x: int,
+                 x: float,
                  n: int,
                  reward: tp.Reward,
                  repeat: bool = False):
